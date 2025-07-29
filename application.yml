@@ -1,0 +1,102 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: document-insights-backend
+  
+  datasource:
+    url: jdbc:h2:mem:documentdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    generate-ddl: true
+    defer-datasource-initialization: false
+    
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      
+  security:
+    user:
+      name: admin
+      password: admin
+
+# OpenAI Configuration
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model: ${OPENAI_MODEL:gpt-4o-mini}
+  max-tokens: ${OPENAI_MAX_TOKENS:2000}
+  temperature: ${OPENAI_TEMPERATURE:0.7}
+
+# Azure OpenAI Configuration (Alternative)
+azure:
+  openai:
+    endpoint: ${AZURE_OPENAI_ENDPOINT:}
+    api-key: ${AZURE_OPENAI_API_KEY:}
+    deployment-name: ${AZURE_OPENAI_DEPLOYMENT:gpt-35-turbo}
+    api-version: ${AZURE_OPENAI_API_VERSION:2024-02-15-preview}
+
+# Google Gemini Configuration (Alternative)
+google:
+  gemini:
+    api-key: ${GOOGLE_GEMINI_API_KEY:}
+    model: ${GOOGLE_GEMINI_MODEL:gemini-pro}
+
+# Anthropic Claude Configuration (Alternative)
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY:}
+  model: ${ANTHROPIC_MODEL:claude-3-sonnet-20240229}
+
+# Local AI Configuration (Ollama)
+ollama:
+  base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+  model: ${OLLAMA_MODEL:llama2}
+
+# AI Provider Selection
+ai:
+  provider: ${AI_PROVIDER:demo} # Options: openai, azure, google, anthropic, ollama, demo
+
+# File Upload Configuration
+file:
+  upload:
+    directory: ${java.io.tmpdir}/document-insights/uploads
+    max-size: 104857600 # 100MB in bytes
+
+# Confluence Configuration
+confluence:
+  timeout: 30000
+  # Default credentials (can be overridden per request)
+  default-email: ${CONFLUENCE_EMAIL:rajeranchi@gmail.com}
+  default-token: ${CONFLUENCE_API_TOKEN:ATATT3xFfGF0h_5o7HYAHhMNO8w3Et2OUiLXGrJel6z-5zm5P90vwPAGZfOdIh0ILrAyXMKbfSgALim8WW-kGHPWaRl8xR_ycggGXT3MvlujGMTSfz52HfNG4wqepCihIj7bpfa-YSVcH2YnIzytJYEL2l4WwaC0KV6ep5PSTlnE09yaa82oKSs=4E2820AB}
+  base-url: ${CONFLUENCE_BASE_URL:https://rajeranchi.atlassian.net}
+
+# Cache Configuration
+cache:
+  insights:
+    ttl: 1800 # 30 minutes in seconds
+    max-size: 1000
+
+# CORS Configuration
+cors:
+  allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+
+logging:
+  level:
+    com.documentinsights: INFO
+    org.springframework.security: WARN 
