@@ -1,0 +1,352 @@
+DOCUMENT INSIGHTS APPLICATION - REMINDER METADATA
+=====================================================
+
+This document contains ALL essential information needed to recreate the Document Insights application from scratch.
+
+## APPLICATION OVERVIEW
+======================
+Name: Document Insights
+Type: AI-powered document analysis system
+Purpose: Upload documents, fetch Confluence content, generate AI insights
+Architecture: Spring Boot backend + React frontend
+
+## CORE FEATURES
+===============
+✓ Document upload (PDF, DOC, DOCX, TXT)
+✓ Confluence integration with API
+✓ AI-powered insights generation
+✓ Multiple AI provider support
+✓ Document management (CRUD)
+✓ Search functionality
+✓ Caching system
+✓ Demo mode (no API keys needed)
+
+## TECHNOLOGY STACK
+==================
+Backend:
+- Java 17
+- Spring Boot 3.2.0
+- Spring Data JPA
+- Spring Security
+- H2 Database (in-memory)
+- Apache PDFBox 3.0.1 (PDF processing)
+- Apache POI 5.2.5 (Word documents)
+- Caffeine (caching)
+- Lombok
+- HttpClient5 (API calls)
+- Jackson (JSON processing)
+
+Frontend:
+- React 18
+- Tailwind CSS 3.3.6
+- Framer Motion 10.16.5 (animations)
+- Axios 1.6.2 (HTTP client)
+- React Hot Toast 2.4.1 (notifications)
+- React Dropzone 14.2.3 (file upload)
+- Lucide React 0.294.0 (icons)
+- React Markdown 9.0.1
+
+## PROJECT STRUCTURE
+====================
+DocumentInsights/
+├── backend-spring/
+│   ├── src/main/java/com/documentinsights/
+│   │   ├── DocumentInsightsApplication.java [Main class]
+│   │   ├── config/ [Security, Cache, DB config]
+│   │   ├── controller/ [REST endpoints]
+│   │   ├── dto/ [Data transfer objects]
+│   │   ├── exception/ [Global exception handling]
+│   │   ├── model/ [JPA entities]
+│   │   ├── repository/ [Data access]
+│   │   └── service/ [Business logic]
+│   ├── src/main/resources/
+│   │   └── application.yml [Configuration]
+│   ├── pom.xml [Dependencies]
+│   └── environment-template.txt [Environment setup]
+├── frontend/
+│   ├── src/
+│   │   ├── components/ [React components]
+│   │   ├── context/ [State management]
+│   │   ├── App.js [Main component]
+│   │   ├── index.js [Entry point]
+│   │   └── index.css [Styles]
+│   ├── package.json [Dependencies]
+│   ├── tailwind.config.js [Styling config]
+│   └── postcss.config.js [CSS processing]
+└── Documentation files
+
+## KEY DEPENDENCIES
+==================
+Backend (pom.xml):
+- spring-boot-starter-web
+- spring-boot-starter-data-jpa
+- spring-boot-starter-security
+- spring-boot-starter-validation
+- spring-boot-starter-cache
+- h2database
+- pdfbox (3.0.1)
+- poi, poi-ooxml, poi-scratchpad (5.2.5)
+- httpclient5
+- caffeine
+- lombok
+
+Frontend (package.json):
+- react (^18.2.0)
+- tailwindcss (^3.3.6)
+- framer-motion (^10.16.5)
+- axios (^1.6.2)
+- react-hot-toast (^2.4.1)
+- react-dropzone (^14.2.3)
+- lucide-react (^0.294.0)
+- @tailwindcss/forms, @tailwindcss/typography
+
+## CORE BACKEND COMPONENTS
+=========================
+1. Document.java - JPA entity with fields:
+   - id, originalName, type, content, filePath, url
+   - uploadedAt, fileSize, fileExtension, mimeType
+   - getContentPreview() methods
+
+2. DocumentRepository.java - JPA repository with:
+   - findByType(), findByContentContaining()
+   - countByType(), getTotalFileSize()
+
+3. DocumentService.java - Main business logic:
+   - uploadDocument(), addConfluenceContent()
+   - generateInsights(), getAllDocuments()
+   - deleteDocument(), searchDocuments()
+
+4. AIService.java - AI integration:
+   - Support for 5 providers: OpenAI, Azure, Google, Anthropic, Ollama
+   - Demo mode implementation
+   - Caching with @Cacheable
+
+5. DocumentProcessorService.java - File processing:
+   - PDF: PDFBox with PDFTextStripper
+   - DOCX: XWPFWordExtractor
+   - DOC: WordExtractor
+   - TXT: Files.readString()
+
+6. ConfluenceService.java - Confluence integration:
+   - REST API calls with Basic auth
+   - Page ID extraction from URLs
+   - HTML content cleaning
+
+7. DocumentController.java - REST endpoints:
+   - /api/upload (POST)
+   - /api/confluence (POST)
+   - /api/insights (POST)
+   - /api/documents (GET, DELETE)
+   - /api/documents/search (GET)
+   - /api/health (GET)
+
+## CORE FRONTEND COMPONENTS
+==========================
+1. App.js - Main application:
+   - Tab navigation (Chat, Upload, Confluence, Documents)
+   - Sidebar with responsive design
+   - Mobile-first approach
+
+2. DocumentContext.js - State management:
+   - useContext hook for global state
+   - API calls with Axios
+   - Demo mode support
+   - Error handling
+
+3. ChatInterface.js - AI chat interface
+4. DocumentUpload.js - File upload with drag-drop
+5. ConfluenceForm.js - Confluence URL input
+6. DocumentList.js - Document management UI
+7. Header.js, Sidebar.js - Navigation components
+
+## DATABASE SCHEMA
+==================
+Table: documents
+- id BIGINT PRIMARY KEY (auto-increment)
+- original_name VARCHAR(255) NOT NULL
+- type VARCHAR(255) NOT NULL ['upload', 'confluence']
+- content CLOB (large text)
+- file_path VARCHAR(255)
+- url VARCHAR(255)
+- uploaded_at TIMESTAMP NOT NULL
+- file_size BIGINT
+- file_extension VARCHAR(255)
+- mime_type VARCHAR(255)
+
+## CONFIGURATION FILES
+======================
+1. application.yml - Main backend config:
+   - Server port: 8080
+   - H2 database: jdbc:h2:mem:documentdb
+   - File upload: 100MB limit
+   - AI provider configurations
+   - Cache settings
+   - CORS settings
+
+2. SecurityConfig.java:
+   - Disable CSRF
+   - Allow all origins (development)
+   - Permit all requests
+
+3. CacheConfig.java:
+   - Caffeine cache manager
+   - insights: 30min TTL, 1000 max size
+   - documentSummaries: 24h TTL, 500 max size
+   - keyTopics: 12h TTL, 200 max size
+
+## ENVIRONMENT VARIABLES
+========================
+Required:
+- OPENAI_API_KEY (or set AI_PROVIDER=demo)
+- FRONTEND_URL=http://localhost:3000
+
+Optional:
+- CONFLUENCE_EMAIL, CONFLUENCE_API_TOKEN, CONFLUENCE_BASE_URL
+- AZURE_OPENAI_*, GOOGLE_GEMINI_*, ANTHROPIC_*, OLLAMA_*
+- AI_PROVIDER=[openai|azure|google|anthropic|ollama|demo]
+
+## API ENDPOINTS
+===============
+GET /api/health - Health check
+POST /api/upload - Upload document (multipart/form-data)
+POST /api/confluence - Add Confluence content (JSON)
+POST /api/insights - Generate AI insights (JSON)
+GET /api/documents - Get all documents
+GET /api/documents/{id} - Get document by ID
+DELETE /api/documents/{id} - Delete document
+GET /api/documents/search?q={query} - Search documents
+GET /api/documents/type/{type} - Get documents by type
+GET /api/documents/stats - Get document statistics
+
+## SETUP INSTRUCTIONS
+=====================
+Prerequisites:
+- Java 17+
+- Node.js 16+
+- Maven (or use ./mvnw)
+
+Backend Setup:
+1. Create Spring Boot project with dependencies
+2. Copy all Java files with exact package structure
+3. Create application.yml with configuration
+4. Set environment variables or use demo mode
+5. Run: ./mvnw spring-boot:run
+
+Frontend Setup:
+1. Create React app: npx create-react-app frontend
+2. Install dependencies: npm install [all packages listed above]
+3. Setup Tailwind CSS: npx tailwindcss init -p
+4. Copy all React files
+5. Configure proxy in package.json: "proxy": "http://localhost:8080"
+6. Run: npm start
+
+## KEY ARCHITECTURAL DECISIONS
+==============================
+1. H2 in-memory database for simplicity
+2. Lombok for reducing boilerplate
+3. Caffeine for caching AI responses
+4. Multiple AI provider support with strategy pattern
+5. Demo mode for testing without API keys
+6. React Context for state management
+7. Tailwind CSS for consistent styling
+8. Framer Motion for smooth animations
+9. File processing with industry-standard libraries
+10. RESTful API design with proper HTTP status codes
+
+## DEMO MODE FEATURES
+====================
+- Works without any API keys
+- Simulated AI responses
+- Mock document processing
+- Fake Confluence integration
+- Progress indicators
+- All UI functionality works
+
+## TAILWIND CONFIGURATION
+=========================
+Extended theme with:
+- Custom color palette (primary, secondary, success, warning, error)
+- Custom animations (fade-in, slide-up, slide-down, pulse-soft)
+- Custom font families (Inter, JetBrains Mono)
+- Custom shadows (soft, soft-lg)
+- Plugins: @tailwindcss/forms, @tailwindcss/typography
+
+## FILE PROCESSING DETAILS
+==========================
+Supported formats: PDF, DOC, DOCX, TXT
+PDF: Apache PDFBox with PDFTextStripper
+DOCX: Apache POI XWPFWordExtractor
+DOC: Apache POI WordExtractor (legacy)
+TXT: Java Files.readString()
+Validation: File size, extension, content extraction
+Cleanup: Remove control chars, normalize whitespace
+
+## AI PROVIDER INTEGRATIONS
+===========================
+1. OpenAI: GPT models via REST API
+2. Azure OpenAI: Azure-hosted OpenAI models
+3. Google Gemini: Google's Gemini Pro model
+4. Anthropic Claude: Claude 3 Sonnet
+5. Ollama: Local AI models
+6. Demo: Hardcoded responses for testing
+
+All providers use same interface with different:
+- Authentication methods
+- Request/response formats
+- Error handling
+
+## ERROR HANDLING
+=================
+Global exception handler for:
+- IOException (file operations)
+- ValidationException (input validation)
+- MaxUploadSizeExceededException (file size)
+- IllegalArgumentException (invalid arguments)
+- Generic Exception (catch-all)
+
+## SECURITY CONSIDERATIONS
+==========================
+- CORS enabled for development
+- No authentication required (development setup)
+- File upload validation
+- API key management through environment variables
+- Input validation with Bean Validation
+
+## TESTING APPROACH
+===================
+- Demo mode for functional testing
+- Error boundaries in React
+- Toast notifications for user feedback
+- Health check endpoint for monitoring
+- Comprehensive exception handling
+
+## PORTS AND URLS
+=================
+Backend: http://localhost:8080
+Frontend: http://localhost:3000
+H2 Console: http://localhost:8080/h2-console
+API Base: http://localhost:8080/api
+
+## CRITICAL SUCCESS FACTORS
+===========================
+1. Exact package structure: com.documentinsights.*
+2. Correct dependency versions in pom.xml and package.json
+3. Proper environment variable setup
+4. Tailwind CSS configuration
+5. React Context provider wrapping
+6. CORS configuration for cross-origin requests
+7. File upload directory creation
+8. Database table auto-creation via JPA
+
+## TROUBLESHOOTING CHECKLIST
+============================
+✓ Java 17+ installed
+✓ Node.js 16+ installed
+✓ Environment variables set (or AI_PROVIDER=demo)
+✓ Ports 3000 and 8080 available
+✓ CORS configuration correct
+✓ File upload directory writable
+✓ All dependencies installed correctly
+✓ Package structure matches exactly
+
+This metadata document contains everything needed to recreate the Document Insights application from scratch. Keep this file as your complete reference guide. 
